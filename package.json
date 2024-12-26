@@ -3,7 +3,7 @@
   "name": "inbox-ai",
   "title": "Inbox AI",
   "description": "Trigger Inbox AI actions from Raycast",
-  "icon": "extension-icon.png",
+  "icon": "inbox-ai-icon.png",
   "author": "dreetje",
   "license": "MIT",
   "commands": [
@@ -17,6 +17,12 @@
       "name": "look",
       "title": "Look",
       "description": "Trigger an action with image input",
+      "mode": "view"
+    },
+    {
+      "name": "read",
+      "title": "Read",
+      "description": "Trigger an action with text input",
       "mode": "view"
     }
   ],
