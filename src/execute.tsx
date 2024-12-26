@@ -11,7 +11,7 @@ interface CommandContext {
 export default function Command(props: LaunchProps<{ launchContext: CommandContext }>) {
   const [showTextForm, setShowTextForm] = useState(false);
   const [selectedAction, setSelectedAction] = useState<SavedAction | null>(null);
-  const [formParams, setFormParams] = useState<Record<string, string>>({});
+  const [formParams] = useState<Record<string, string>>({});
 
   const handleActionSelect = async (action: SavedAction) => {
     setSelectedAction(action);
@@ -21,15 +21,15 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
 
   const handleSubmit = async (values: Record<string, string>) => {
     if (!selectedAction) return;
-    
+
     const params = new URLSearchParams();
-    params.append('action', selectedAction.id);
-    
+    params.append("action", selectedAction.id);
+
     // Add all form values as parameters
     Object.entries(values).forEach(([key, value]) => {
-      if (typeof value === 'string' && value.trim() !== '') {
-        if (key === 'text') {
-          params.append('originalInput', value);
+      if (typeof value === "string" && value.trim() !== "") {
+        if (key === "text") {
+          params.append("originalInput", value);
         } else {
           params.append(key, value);
         }
@@ -56,10 +56,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
       <Form
         actions={
           <ActionPanel>
-            <Action.SubmitForm 
-              title="Submit" 
-              onSubmit={handleSubmit}
-            />
+            <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
           </ActionPanel>
         }
       >
@@ -68,17 +65,17 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
           title="Input"
           placeholder="The input for the AI action"
           enableMarkdown={false}
-          autoFocus          
+          autoFocus
         />
         {selectedAction.variables
-          .filter(v => v.ai)
-          .map(variable => (
+          .filter((v) => v.ai)
+          .map((variable) => (
             <Form.TextField
               key={variable.id}
               id={variable.id}
               title={variable.label}
               placeholder={variable.description}
-              defaultValue={variable.value}              
+              defaultValue={variable.value}
             />
           ))}
       </Form>
@@ -88,7 +85,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
   return (
     <ActionList
       commandName="execute"
-      supportedTypes={['askAI']}
+      supportedTypes={["askAI"]}
       actionTitle="Execute"
       urlScheme="execute"
       launchContext={props.launchContext}
@@ -97,5 +94,3 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
     />
   );
 }
-
- 

@@ -19,7 +19,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
         });
         return false;
       }
-      
+
       const url = `inboxai://execute?action=${encodeURIComponent(action.id)}&originalInput=${encodeURIComponent(content)}`;
       try {
         await open(url);
@@ -45,7 +45,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
   return (
     <ActionList
       commandName="execute_browser_content"
-      supportedTypes={['askAI']}
+      supportedTypes={["askAI"]}
       actionTitle="Execute with Browser Content"
       urlScheme="execute"
       launchContext={props.launchContext}
@@ -55,6 +55,6 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
 }
 
 // Add this at the top level of the file to help with debugging
-process.on('unhandledRejection', (error) => {
-  console.error('Unhandled promise rejection:', error);
-}); 
+process.on("unhandledRejection", (error) => {
+  console.error("Unhandled promise rejection:", error);
+});

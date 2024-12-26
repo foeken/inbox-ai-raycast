@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, showToast, Toast, open, LaunchProps } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, open } from "@raycast/api";
 import { createDeeplink } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { PlistData, SavedAction, readPlistFile, getIconForName, filterActions } from "../actions";
@@ -35,19 +35,19 @@ export default function ActionList({
       setPlistData(data);
       // If we have a context with actionId, execute that action
       if (launchContext?.actionId) {
-        const action = data.savedActions.find(a => a.id === launchContext.actionId);
+        const action = data.savedActions.find((a) => a.id === launchContext.actionId);
         if (action) {
           if (onActionSelect) {
             onActionSelect(action);
           } else {
             const params = new URLSearchParams();
-            params.append('action', action.id);
-            
+            params.append("action", action.id);
+
             // Add original input if provided
             if (launchContext.originalInput) {
-              params.append('originalInput', launchContext.originalInput);
+              params.append("originalInput", launchContext.originalInput);
             }
-            
+
             // Add any extra URL parameters
             Object.entries(extraUrlParams).forEach(([key, value]) => {
               params.append(key, value);
@@ -90,8 +90,8 @@ export default function ActionList({
 
     try {
       const params = new URLSearchParams();
-      params.append('action', action.id);
-      
+      params.append("action", action.id);
+
       // Add any extra URL parameters
       Object.entries(extraUrlParams).forEach(([key, value]) => {
         params.append(key, value);
@@ -109,11 +109,7 @@ export default function ActionList({
   };
 
   return (
-    <List
-      searchText={searchText}
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search actions..."
-    >
+    <List searchText={searchText} onSearchTextChange={setSearchText} searchBarPlaceholder="Search actions...">
       <List.Section title="Available Actions">
         {filteredActions.map((action) => (
           <List.Item
@@ -121,14 +117,11 @@ export default function ActionList({
             title={action.displayName}
             subtitle={action.description}
             icon={{ source: getIconForName(action.icon) }}
-            accessories={[{ text: action.type === 'askAI' ? 'Ask AI' : 'AI Conversation' }]}
+            accessories={[{ text: action.type === "askAI" ? "Ask AI" : "AI Conversation" }]}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <Action
-                    title={`${actionTitle} ${action.displayName}`}
-                    onAction={() => triggerAction(action)}
-                  />
+                  <Action title={`${actionTitle} ${action.displayName}`} onAction={() => triggerAction(action)} />
                   <Action.CreateQuicklink
                     title="Create Quick Link"
                     quicklink={{
@@ -136,9 +129,9 @@ export default function ActionList({
                       link: createDeeplink({
                         command: commandName,
                         context: {
-                          actionId: action.id
-                        }
-                      })
+                          actionId: action.id,
+                        },
+                      }),
                     }}
                     shortcut={{ modifiers: ["cmd"], key: "." }}
                   />
@@ -150,4 +143,4 @@ export default function ActionList({
       </List.Section>
     </List>
   );
-} 
+}
