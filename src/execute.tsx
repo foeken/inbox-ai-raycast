@@ -1,6 +1,7 @@
-import { ActionPanel, Action, List, showToast, Toast, open, Form, LaunchProps } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { PlistData, SavedAction, readPlistFile, getIconForName, filterActions } from "./actions";
+import { LaunchProps, Form, ActionPanel, Action, open, showToast, Toast } from "@raycast/api";
+import { useState } from "react";
+import ActionList from "./components/ActionList";
+import { SavedAction } from "./actions";
 
 interface CommandContext {
   actionId?: string;
@@ -8,61 +9,45 @@ interface CommandContext {
 }
 
 export default function Command(props: LaunchProps<{ launchContext: CommandContext }>) {
-  const [plistData, setPlistData] = useState<PlistData | null>(null);
-  const [searchText, setSearchText] = useState("");
   const [showTextForm, setShowTextForm] = useState(false);
   const [selectedAction, setSelectedAction] = useState<SavedAction | null>(null);
+  const [formParams, setFormParams] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    const data = readPlistFile();
-    if (data) {
-      setPlistData(data);
-      // If we have a context with actionId, show form for that action
-      const context = props.launchContext;
-      if (context?.actionId) {
-        const action = data.savedActions.find(a => a.id === context.actionId);
-        if (action) {
-          setSelectedAction(action);
-          setShowTextForm(true);
-        }
-      }
-    } else {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "Could not read Inbox AI preferences",
-      });
-    }
-  }, [props.launchContext]);
-
-  const filteredActions = filterActions(plistData?.savedActions, searchText, ['askAI']);
+  const handleActionSelect = async (action: SavedAction) => {
+    setSelectedAction(action);
+    setShowTextForm(true);
+    return false; // Prevent default URL opening
+  };
 
   const handleSubmit = async (values: Record<string, string>) => {
     if (!selectedAction) return;
     
-    try {
-      const params = new URLSearchParams();
-      params.append('action', selectedAction.id);
-
-      // Add all form values as parameters
-      Object.entries(values).forEach(([key, value]) => {
-        if (value && value.trim() !== '') {
-          if (key === 'text') {
-            params.append('originalInput', value);
-          } else {
-            params.append(key, value);
-          }
+    const params = new URLSearchParams();
+    params.append('action', selectedAction.id);
+    
+    // Add all form values as parameters
+    Object.entries(values).forEach(([key, value]) => {
+      if (typeof value === 'string' && value.trim() !== '') {
+        if (key === 'text') {
+          params.append('originalInput', value);
+        } else {
+          params.append(key, value);
         }
-      });
+      }
+    });
 
-      const url = `inboxai://execute?${params.toString()}`;
+    const url = `inboxai://execute?${params.toString()}`;
+    try {
       await open(url);
+      setShowTextForm(false);
+      return true;
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
         title: "Error",
         message: "Failed to launch Inbox AI. Is it installed?",
       });
+      return false;
     }
   };
 
@@ -71,7 +56,10 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
       <Form
         actions={
           <ActionPanel>
-            <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
+            <Action.SubmitForm 
+              title="Submit" 
+              onSubmit={handleSubmit}
+            />
           </ActionPanel>
         }
       >
@@ -98,40 +86,16 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
   }
 
   return (
-    <List
-      searchText={searchText}
-      onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search actions..."
-    >
-      <List.Section title="Available Actions">
-        {filteredActions.map((action) => (
-          <List.Item
-            key={action.id}
-            title={action.displayName}
-            subtitle={action.description}
-            icon={{ source: getIconForName(action.icon) }}
-            accessories={[{ text: 'Ask AI' }]}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section>
-                  <Action
-                    title={`Execute ${action.displayName}`}
-                    onAction={() => {
-                      setSelectedAction(action);
-                      setShowTextForm(true);
-                    }}
-                  />                  
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
-    </List>
+    <ActionList
+      commandName="execute"
+      supportedTypes={['askAI']}
+      actionTitle="Execute"
+      urlScheme="execute"
+      launchContext={props.launchContext}
+      onActionSelect={handleActionSelect}
+      extraUrlParams={formParams}
+    />
   );
 }
 
-// Add this at the top level of the file to help with debugging
-process.on('unhandledRejection', (error) => {
-  console.error('Unhandled promise rejection:', error);
-}); 
+ 

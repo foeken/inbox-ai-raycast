@@ -8,27 +8,45 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "listen",
-      "title": "Listen",
+      "name": "audio",
+      "title": "Audio",
       "description": "Trigger an action with audio input",
       "mode": "view"
     },
     {
-      "name": "look",
-      "title": "Look",
-      "description": "Trigger an action with image input",
+      "name": "audio_selected_text",
+      "title": "Audio with Selected Text",
+      "description": "Trigger an audio action with selected text",
       "mode": "view"
     },
     {
-      "name": "read_selected_text",
-      "title": "Read Selected Text",
-      "description": "Trigger an action with selected text",
+      "name": "audio_browser_content",
+      "title": "Audio with Browser Content",
+      "description": "Trigger an audio action with browser content",
+      "mode": "view"
+    },
+    {
+      "name": "screenshot",
+      "title": "Screenshot",
+      "description": "Trigger an action with screenshot input",
       "mode": "view"
     },
     {
       "name": "execute",
       "title": "Execute",
       "description": "Execute an action with form input",
+      "mode": "view"
+    },
+    {
+      "name": "execute_selected_text",
+      "title": "Execute with Selected Text",
+      "description": "Trigger an action with selected text",
+      "mode": "view"
+    },    
+    {
+      "name": "execute_browser_content",
+      "title": "Execute with Browser Content",
+      "description": "Trigger an action with browser content",
       "mode": "view"
     }
   ],
