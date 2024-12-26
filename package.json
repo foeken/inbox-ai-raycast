@@ -10,27 +10,27 @@
   "commands": [
     {
       "name": "audio",
-      "title": "Process Audio",
+      "title": "Record Audio",
       "description": "Trigger an action with audio input",
       "mode": "view"
     },
     {
       "name": "audio_selected_text",
-      "title": "Process Audio",
+      "title": "Record Audio",
       "subtitle": "with Selected Text",
       "description": "Trigger an audio action with selected text",
       "mode": "view"
     },
     {
       "name": "audio_browser_content",
-      "title": "Process Audio",
+      "title": "Record Audio",
       "subtitle": "with Browser Content",
       "description": "Trigger an audio action with browser content",
       "mode": "view"
     },
     {
       "name": "screenshot",
-      "title": "Process Screenshot",      
+      "title": "Take Screenshot",      
       "description": "Trigger an action with screenshot input",
       "mode": "view"
     },
