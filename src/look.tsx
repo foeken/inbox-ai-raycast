@@ -19,11 +19,11 @@ export default function Command() {
     }
   }, []);
 
-  const filteredActions = filterActions(plistData?.savedActions, searchText, ['askAI', 'realtimeAI']);
+  const filteredActions = filterActions(plistData?.savedActions, searchText, ['askAI']);
 
-  const triggerVoiceInput = async (action: SavedAction) => {
+  const triggerScreenshot = async (action: SavedAction) => {
     try {
-      const url = `inboxai://audio?action=${encodeURIComponent(action.id)}`;
+      const url = `inboxai://screenshot?action=${encodeURIComponent(action.id)}`;
       await open(url);
     } catch (error) {
       showToast({
@@ -51,8 +51,8 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action
-                  title={`Listen for ${action.displayName}`}
-                  onAction={() => triggerVoiceInput(action)}
+                  title={`Look for ${action.displayName}`}
+                  onAction={() => triggerScreenshot(action)}
                 />
               </ActionPanel>
             }
@@ -66,4 +66,4 @@ export default function Command() {
 // Add this at the top level of the file to help with debugging
 process.on('unhandledRejection', (error) => {
   console.error('Unhandled promise rejection:', error);
-});
+}); 

@@ -12,6 +12,12 @@
       "title": "Listen",
       "description": "Trigger an action with audio input",
       "mode": "view"
+    },
+    {
+      "name": "look",
+      "title": "Look",
+      "description": "Trigger an action with image input",
+      "mode": "view"
     }
   ],
   "dependencies": {
