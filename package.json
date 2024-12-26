@@ -20,9 +20,15 @@
       "mode": "view"
     },
     {
-      "name": "read",
-      "title": "Read",
-      "description": "Trigger an action with text input",
+      "name": "read_selected_text",
+      "title": "Read Selected Text",
+      "description": "Trigger an action with selected text",
+      "mode": "view"
+    },
+    {
+      "name": "execute",
+      "title": "Execute",
+      "description": "Execute an action with form input",
       "mode": "view"
     }
   ],

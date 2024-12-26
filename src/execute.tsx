@@ -1,8 +1,13 @@
-import { ActionPanel, Action, List, showToast, Toast, open, getSelectedText, Form } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, open, Form, LaunchProps } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { PlistData, SavedAction, readPlistFile, getIconForName, filterActions } from "./actions";
 
-export default function Command() {
+interface CommandContext {
+  actionId?: string;
+  variables?: Record<string, string>;
+}
+
+export default function Command(props: LaunchProps<{ launchContext: CommandContext }>) {
   const [plistData, setPlistData] = useState<PlistData | null>(null);
   const [searchText, setSearchText] = useState("");
   const [showTextForm, setShowTextForm] = useState(false);
@@ -12,6 +17,15 @@ export default function Command() {
     const data = readPlistFile();
     if (data) {
       setPlistData(data);
+      // If we have a context with actionId, show form for that action
+      const context = props.launchContext;
+      if (context?.actionId) {
+        const action = data.savedActions.find(a => a.id === context.actionId);
+        if (action) {
+          setSelectedAction(action);
+          setShowTextForm(true);
+        }
+      }
     } else {
       showToast({
         style: Toast.Style.Failure,
@@ -19,29 +33,9 @@ export default function Command() {
         message: "Could not read Inbox AI preferences",
       });
     }
-  }, []);
+  }, [props.launchContext]);
 
   const filteredActions = filterActions(plistData?.savedActions, searchText, ['askAI']);
-
-  const triggerWithSelectedText = async (action: SavedAction) => {
-    try {
-      const selectedText = await getSelectedText().catch(() => null);
-      if (!selectedText) {
-        setSelectedAction(action);
-        setShowTextForm(true);
-        return;
-      }
-      
-      const url = `inboxai://execute?action=${encodeURIComponent(action.id)}&originalInput=${encodeURIComponent(selectedText)}`;
-      await open(url);
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "Failed to launch Inbox AI. Is it installed?",
-      });
-    }
-  };
 
   const handleSubmit = async (values: Record<string, string>) => {
     if (!selectedAction) return;
@@ -84,7 +78,7 @@ export default function Command() {
         <Form.TextArea
           id="text"
           title="Input"
-          placeholder="Enter the import for the action here"
+          placeholder="The input for the AI action"
           enableMarkdown={false}
           autoFocus          
         />
@@ -119,10 +113,15 @@ export default function Command() {
             accessories={[{ text: 'Ask AI' }]}
             actions={
               <ActionPanel>
-                <Action
-                  title={`Read for ${action.displayName}`}
-                  onAction={() => triggerWithSelectedText(action)}
-                />
+                <ActionPanel.Section>
+                  <Action
+                    title={`Execute ${action.displayName}`}
+                    onAction={() => {
+                      setSelectedAction(action);
+                      setShowTextForm(true);
+                    }}
+                  />                  
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />

@@ -1,10 +1,11 @@
-import { ActionPanel, Action, List, showToast, Toast, open, LaunchProps } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, open, getSelectedText, LaunchProps } from "@raycast/api";
 import { createDeeplink, DeeplinkType } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { PlistData, SavedAction, readPlistFile, getIconForName, filterActions } from "./actions";
 
 interface CommandContext {
   actionId?: string;
+  originalInput?: string;
 }
 
 export default function Command(props: LaunchProps<{ launchContext: CommandContext }>) {
@@ -15,12 +16,12 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
     const data = readPlistFile();
     if (data) {
       setPlistData(data);
-      // If we have a context with actionId, execute that action
+      // If we have a context with actionId, try to find and execute that action
       const context = props.launchContext;
-      if (context?.actionId) {
+      if (context?.actionId && context?.originalInput) {
         const action = data.savedActions.find(a => a.id === context.actionId);
         if (action) {
-          const url = `inboxai://screenshot?action=${encodeURIComponent(action.id)}`;
+          const url = `inboxai://execute?action=${encodeURIComponent(action.id)}&originalInput=${encodeURIComponent(context.originalInput)}`;
           open(url);
         }
       }
@@ -35,9 +36,19 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
 
   const filteredActions = filterActions(plistData?.savedActions, searchText, ['askAI']);
 
-  const triggerScreenshot = async (action: SavedAction) => {
+  const triggerWithSelectedText = async (action: SavedAction) => {
     try {
-      const url = `inboxai://screenshot?action=${encodeURIComponent(action.id)}`;
+      const selectedText = await getSelectedText().catch(() => null);
+      if (!selectedText) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "No Text Selected",
+          message: "Please select some text first",
+        });
+        return;
+      }
+      
+      const url = `inboxai://execute?action=${encodeURIComponent(action.id)}&originalInput=${encodeURIComponent(selectedText)}`;
       await open(url);
     } catch (error) {
       showToast({
@@ -66,15 +77,15 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
               <ActionPanel>
                 <ActionPanel.Section>
                   <Action
-                    title={`Look for ${action.displayName}`}
-                    onAction={() => triggerScreenshot(action)}
+                    title={`Read Selected Text with ${action.displayName}`}
+                    onAction={() => triggerWithSelectedText(action)}
                   />
                   <Action.CreateQuicklink
                     title="Create Quick Link"
                     quicklink={{
                       name: action.displayName,
                       link: createDeeplink({
-                        command: "look",
+                        command: "read_selected_text",
                         context: {
                           actionId: action.id
                         }

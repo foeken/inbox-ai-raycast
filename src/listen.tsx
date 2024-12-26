@@ -1,8 +1,13 @@
-import { ActionPanel, Action, List, showToast, Toast, open } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, open, LaunchProps } from "@raycast/api";
+import { createDeeplink, DeeplinkType } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { PlistData, SavedAction, readPlistFile, getIconForName, filterActions } from "./actions";
 
-export default function Command() {
+interface CommandContext {
+  actionId?: string;
+}
+
+export default function Command(props: LaunchProps<{ launchContext: CommandContext }>) {
   const [plistData, setPlistData] = useState<PlistData | null>(null);
   const [searchText, setSearchText] = useState("");
 
@@ -10,6 +15,15 @@ export default function Command() {
     const data = readPlistFile();
     if (data) {
       setPlistData(data);
+      // If we have a context with actionId, execute that action
+      const context = props.launchContext;
+      if (context?.actionId) {
+        const action = data.savedActions.find(a => a.id === context.actionId);
+        if (action) {
+          const url = `inboxai://audio?action=${encodeURIComponent(action.id)}`;
+          open(url);
+        }
+      }
     } else {
       showToast({
         style: Toast.Style.Failure,
@@ -17,7 +31,7 @@ export default function Command() {
         message: "Could not read Inbox AI preferences",
       });
     }
-  }, []);
+  }, [props.launchContext]);
 
   const filteredActions = filterActions(plistData?.savedActions, searchText, ['askAI', 'realtimeAI']);
 
@@ -50,10 +64,25 @@ export default function Command() {
             accessories={[{ text: action.type === 'askAI' ? 'Ask AI' : 'AI Conversation' }]}
             actions={
               <ActionPanel>
-                <Action
-                  title={`Listen for ${action.displayName}`}
-                  onAction={() => triggerVoiceInput(action)}
-                />
+                <ActionPanel.Section>
+                  <Action
+                    title={`Listen for ${action.displayName}`}
+                    onAction={() => triggerVoiceInput(action)}
+                  />
+                  <Action.CreateQuicklink
+                    title="Create Quick Link"
+                    quicklink={{
+                      name: action.displayName,
+                      link: createDeeplink({
+                        command: "listen",
+                        context: {
+                          actionId: action.id
+                        }
+                      })
+                    }}
+                    shortcut={{ modifiers: ["cmd"], key: "." }}
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
