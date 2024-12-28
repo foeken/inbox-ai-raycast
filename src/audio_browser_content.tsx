@@ -10,8 +10,14 @@ interface CommandContext {
 export default function Command(props: LaunchProps<{ launchContext: CommandContext }>) {
   const handleActionSelect = async (action: SavedAction) => {
     try {
-      const content = await BrowserExtension.getContent({ format: "markdown" });
-      if (!content) {
+      const [content, tabs] = await Promise.all([
+        BrowserExtension.getContent({ format: "markdown" }),
+        BrowserExtension.getTabs()
+      ]);
+
+      const activeTab = tabs.find(tab => tab.active);
+
+      if (!content || !activeTab) {
         showToast({
           style: Toast.Style.Failure,
           title: "No Browser Content",
@@ -20,7 +26,12 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
         return false;
       }
 
-      const url = `inboxai://audio?action=${encodeURIComponent(action.id)}&originalInput=${encodeURIComponent(content)}`;
+      const markdownWithMeta = JSON.stringify({
+        title: activeTab.title,
+        url: activeTab.url,
+        content: content
+      });
+      const url = `inboxai://audio?action=${encodeURIComponent(action.id)}&originalInput=${encodeURIComponent(markdownWithMeta)}`;
       try {
         await open(url);
         return true;
