@@ -1,6 +1,6 @@
-import { LaunchProps, showToast, Toast, BrowserExtension, open } from "@raycast/api";
+import { LaunchProps, showToast, Toast, BrowserExtension, open, Action, Icon } from "@raycast/api";
 import ActionList from "./components/ActionList";
-import { SavedAction } from "./actions";
+import { getIconForName, SavedAction } from "./actions";
 
 interface CommandContext {
   actionId?: string;
@@ -8,16 +8,41 @@ interface CommandContext {
 }
 
 export default function Command(props: LaunchProps<{ launchContext: CommandContext }>) {
-  const handleActionSelect = async (action: SavedAction) => {
+  const openInboxAI = async (url: string) => {
     try {
-      const [content, tabs] = await Promise.all([
-        BrowserExtension.getContent({ format: "markdown" }),
-        BrowserExtension.getTabs()
-      ]);
+      await open(url);
+      return true;
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: "Failed to launch Inbox AI. Is it installed?",
+      });
+      return false;
+    }
+  };
 
+  const handleAction = async (action: SavedAction, urlOnly = false) => {
+    try {
+      const tabs = await BrowserExtension.getTabs();
       const activeTab = tabs.find(tab => tab.active);
 
-      if (!content || !activeTab) {
+      if (!activeTab) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "No Active Tab",
+          message: "Please make sure a webpage is active.",
+        });
+        return false;
+      }
+
+      const originalInput = urlOnly ? activeTab.url : JSON.stringify({
+        title: activeTab.title,
+        url: activeTab.url,
+        content: await BrowserExtension.getContent({ format: "markdown" })
+      });
+
+      if (!urlOnly && !originalInput) {
         showToast({
           style: Toast.Style.Failure,
           title: "No Browser Content",
@@ -26,28 +51,12 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
         return false;
       }
 
-      const markdownWithMeta = JSON.stringify({
-        title: activeTab.title,
-        url: activeTab.url,
-        content: content
-      });
-      const url = `inboxai://audio?action=${encodeURIComponent(action.id)}&originalInput=${encodeURIComponent(markdownWithMeta)}`;
-      try {
-        await open(url);
-        return true;
-      } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: "Failed to launch Inbox AI. Is it installed?",
-        });
-        return false;
-      }
+      return openInboxAI(`inboxai://audio?action=${encodeURIComponent(action.id)}&originalInput=${encodeURIComponent(originalInput)}`);
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
         title: "Error",
-        message: "Failed to get browser content. Is the browser extension installed?",
+        message: `Failed to get browser ${urlOnly ? "tabs" : "content"}. Is the browser extension installed?`,
       });
       return false;
     }
@@ -60,7 +69,16 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
       actionTitle="Audio with Browser Content"
       urlScheme="audio"
       launchContext={props.launchContext}
-      onActionSelect={handleActionSelect}
+      onActionSelect={(action) => handleAction(action, false)}
+      extraActions={(action) => [
+        <Action
+          key="url-only"
+          icon={Icon.CommandSymbol}
+          title="Trigger Action (URL Only)"
+          shortcut={{ modifiers: ["opt"], key: "enter" }}
+          onAction={() => handleAction(action, true)}
+        />
+      ]}
     />
   );
 }

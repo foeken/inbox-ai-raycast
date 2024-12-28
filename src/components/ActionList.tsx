@@ -1,4 +1,5 @@
-import { ActionPanel, Action, List, showToast, Toast, open } from "@raycast/api";
+import { Icon, ActionPanel, Action, List, showToast, Toast, open } from "@raycast/api";
+import type { Action as ActionType } from "@raycast/api";
 import { createDeeplink } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { PlistData, SavedAction, readPlistFile, getIconForName, filterActions } from "../actions";
@@ -15,6 +16,7 @@ interface ActionListProps {
   };
   onActionSelect?: (action: SavedAction) => void;
   extraUrlParams?: Record<string, string>;
+  extraActions?: (action: SavedAction) => JSX.Element[];
 }
 
 export default function ActionList({
@@ -25,6 +27,7 @@ export default function ActionList({
   launchContext,
   onActionSelect,
   extraUrlParams = {},
+  extraActions,
 }: ActionListProps) {
   const [plistData, setPlistData] = useState<PlistData | null>(null);
   const [searchText, setSearchText] = useState("");
@@ -121,7 +124,8 @@ export default function ActionList({
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <Action title={`${actionTitle} ${action.displayName}`} onAction={() => triggerAction(action)} />
+                  <Action icon={Icon.CommandSymbol} title="Trigger Action" onAction={() => triggerAction(action)} />
+                  {extraActions && extraActions(action)}
                   <Action.CreateQuicklink
                     title="Create Quick Link"
                     quicklink={{
