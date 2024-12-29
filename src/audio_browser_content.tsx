@@ -1,6 +1,6 @@
 import { LaunchProps, showToast, Toast, BrowserExtension, open, Action, Icon } from "@raycast/api";
 import ActionList from "./components/ActionList";
-import { getIconForName, SavedAction } from "./actions";
+import { SavedAction } from "./actions";
 
 interface CommandContext {
   actionId?: string;
@@ -25,7 +25,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
   const handleAction = async (action: SavedAction, urlOnly = false) => {
     try {
       const tabs = await BrowserExtension.getTabs();
-      const activeTab = tabs.find(tab => tab.active);
+      const activeTab = tabs.find((tab) => tab.active);
 
       if (!activeTab) {
         showToast({
@@ -36,11 +36,13 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
         return false;
       }
 
-      const originalInput = urlOnly ? activeTab.url : JSON.stringify({
-        title: activeTab.title,
-        url: activeTab.url,
-        content: await BrowserExtension.getContent({ format: "markdown" })
-      });
+      const originalInput = urlOnly
+        ? activeTab.url
+        : JSON.stringify({
+            title: activeTab.title,
+            url: activeTab.url,
+            content: await BrowserExtension.getContent({ format: "markdown" }),
+          });
 
       if (!urlOnly && !originalInput) {
         showToast({
@@ -51,7 +53,9 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
         return false;
       }
 
-      return openInboxAI(`inboxai://audio?action=${encodeURIComponent(action.id)}&originalInput=${encodeURIComponent(originalInput)}`);
+      return openInboxAI(
+        `inboxai://audio?action=${encodeURIComponent(action.id)}&originalInput=${encodeURIComponent(originalInput)}`,
+      );
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
@@ -66,7 +70,6 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
     <ActionList
       commandName="audio_browser_content"
       supportedTypes={["askAI", "realtimeAI"]}
-      actionTitle="Audio with Browser Content"
       urlScheme="audio"
       launchContext={props.launchContext}
       onActionSelect={(action) => handleAction(action, false)}
@@ -74,10 +77,10 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
         <Action
           key="url-only"
           icon={Icon.CommandSymbol}
-          title="Trigger Action (URL Only)"
+          title="Trigger Action (url Only)"
           shortcut={{ modifiers: ["opt"], key: "enter" }}
           onAction={() => handleAction(action, true)}
-        />
+        />,
       ]}
     />
   );

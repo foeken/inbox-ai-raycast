@@ -128,11 +128,13 @@ export function filterActions(
   supportedTypes: string[],
 ): SavedAction[] {
   return (
-    actions?.filter(
-      (action) =>
-        supportedTypes.includes(action.type) &&
-        (action.displayName.toLowerCase().includes(searchText.toLowerCase()) ||
-          action.description.toLowerCase().includes(searchText.toLowerCase())),
-    ).sort((a, b) => a.displayName.localeCompare(b.displayName)) || []
+    actions
+      ?.filter(
+        (action) =>
+          supportedTypes.includes(action.type) &&
+          (action.displayName.toLowerCase().includes(searchText.toLowerCase()) ||
+            action.description.toLowerCase().includes(searchText.toLowerCase())),
+      )
+      .sort((a, b) => a.displayName.localeCompare(b.displayName)) || []
   );
 }

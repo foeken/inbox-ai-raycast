@@ -11,7 +11,6 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
     <ActionList
       commandName="audio"
       supportedTypes={["askAI", "realtimeAI"]}
-      actionTitle="Audio"
       urlScheme="audio"
       launchContext={props.launchContext}
     />

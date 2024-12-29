@@ -86,7 +86,6 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
     <ActionList
       commandName="execute"
       supportedTypes={["askAI"]}
-      actionTitle="Execute"
       urlScheme="execute"
       launchContext={props.launchContext}
       onActionSelect={handleActionSelect}

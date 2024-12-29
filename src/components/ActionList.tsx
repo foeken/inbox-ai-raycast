@@ -1,5 +1,4 @@
 import { Icon, ActionPanel, Action, List, showToast, Toast, open } from "@raycast/api";
-import type { Action as ActionType } from "@raycast/api";
 import { createDeeplink } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { PlistData, SavedAction, readPlistFile, getIconForName, filterActions } from "../actions";
@@ -22,7 +21,6 @@ interface ActionListProps {
 export default function ActionList({
   commandName,
   supportedTypes,
-  actionTitle,
   urlScheme,
   launchContext,
   onActionSelect,

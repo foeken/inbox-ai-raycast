@@ -10,7 +10,6 @@ export default function Command(props: LaunchProps<{ launchContext: CommandConte
     <ActionList
       commandName="screenshot"
       supportedTypes={["askAI"]}
-      actionTitle="Screenshot"
       urlScheme="screenshot"
       launchContext={props.launchContext}
     />
